@@ -1,4 +1,4 @@
-module plasticator
+module github.com/co-in/plasticator
 
 go 1.17
 
