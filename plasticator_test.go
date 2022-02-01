@@ -1,17 +1,21 @@
 package plasticator_test
 
 import (
+	"bytes"
+	"fmt"
+	"github.com/co-in/plasticator"
 	"gopkg.in/check.v1"
 	"image"
 	"image/color"
 	"image/draw"
-	"plasticator"
+	"image/png"
+	"io"
+	"os"
 	"testing"
 )
 
 type suite struct {
-	img    *image.NRGBA
-	tmpImg *image.NRGBA
+	img *image.NRGBA
 }
 
 var _ = check.Suite(&suite{})
@@ -48,36 +52,36 @@ func (s *suite) SetUpSuite(c *check.C) {
 	}
 }
 
-func (s *suite) SetUpTest(c *check.C) {
-	b := s.img.Bounds()
-	s.tmpImg = (*image.NRGBA)(image.NewRGBA(image.Rect(0, 0, b.Dx(), b.Dy())))
-	draw.Draw(s.tmpImg, s.tmpImg.Bounds(), s.img, b.Min, draw.Src)
-}
+//func (s *suite) SetUpTest(c *check.C) {
+//	b := s.img.Bounds()
+//	s.tmpImg = (*image.NRGBA)(image.NewRGBA(image.Rect(0, 0, b.Dx(), b.Dy())))
+//	draw.Draw(s.tmpImg, s.tmpImg.Bounds(), s.img, b.Min, draw.Src)
+//}
 
 func (s *suite) TestLens(c *check.C) {
 	var err error
 	var img plasticator.IPlastic
 
-	img = plasticator.NewImage(s.tmpImg)
+	img = plasticator.NewImage(s.img)
 	err = img.Lens(img.Width()/2, img.Height()/2, img.Height()/2, 0)
 	c.Assert(err, check.NotNil)
 
-	img = plasticator.NewImage(s.tmpImg)
+	img = plasticator.NewImage(s.img)
 	err = img.Lens(img.Width()/2, img.Height()/2, img.Height()/2, 200)
 	c.Assert(err, check.NotNil)
 
 	for i := 1; i <= 100; i++ {
-		img = plasticator.NewImage(s.tmpImg)
+		img = plasticator.NewImage(s.img)
 		err = img.Lens(img.Width()/2, img.Height()/2, img.Height()/2, i)
 		c.Assert(err, check.IsNil)
 
-		////TODO Compare with testdata
-		//buf := new(bytes.Buffer)
-		//err = png.Encode(buf, img.Image())
-		//c.Assert(err, check.IsNil)
-		//f, _ := os.Create(fmt.Sprintf("lens_%03d.png", i))
-		//_, _ = io.Copy(f, bytes.NewReader(buf.Bytes()))
-		//_ = f.Close()
+		//TODO Compare with testdata
+		buf := new(bytes.Buffer)
+		err = png.Encode(buf, img.Image())
+		c.Assert(err, check.IsNil)
+		f, _ := os.Create(fmt.Sprintf("lens_%03d.png", i))
+		_, _ = io.Copy(f, bytes.NewReader(buf.Bytes()))
+		_ = f.Close()
 	}
 }
 
@@ -86,7 +90,7 @@ func (s *suite) TestSwirl(c *check.C) {
 	var img plasticator.IPlastic
 
 	for i := -10; i <= 10; i++ {
-		img = plasticator.NewImage(s.tmpImg)
+		img = plasticator.NewImage(s.img)
 		err = img.Swirl(img.Width()/2, img.Height()/2, img.Height()/2, i)
 		c.Assert(err, check.IsNil)
 
